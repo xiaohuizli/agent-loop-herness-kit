@@ -18,6 +18,7 @@ Every loop must define:
 | Goal | One concrete outcome |
 | Scope | Files, modules, docs, SQL, tests, and commands allowed |
 | Done | Objective stop condition |
+| Requirement Gate | Whether PRD/spec confirmation is required before implementation |
 | State | Where attempts, failures, blockers, and evidence are recorded |
 | Feedback | What failure output enters the next attempt |
 | Guardrails | Stop limits and human approval gates |
@@ -30,6 +31,16 @@ Every loop must define:
 3. Add only the smallest missing harness pieces.
 4. Define the loop contract before implementation or agent dispatch.
 5. Run focused verification before claiming completion.
+
+## Requirement and Documentation Gates
+
+For projects that require product or contract discipline, add an explicit PRD/spec confirmation gate to the root instruction file:
+
+- New requirements, behavior changes, API contract changes, workflow changes, and cross-file fixes must complete PRD/spec confirmation before implementation.
+- PRD and Spec confirmation should be staged: PRD first, then Spec, then implementation planning and code changes.
+- Fast fixes that skip documentation require an explicit user approval after the skipped scope, risks, and verification method are stated.
+- New Markdown deliverables should live under a categorized `docs/` folder, be indexed from `docs/index.md`, and use versioned filenames instead of overwriting earlier documents.
+- Non-ASCII generated content, especially Chinese comments, SQL, prompts, and Markdown, must be written as UTF-8. In Windows/PowerShell paths, make UTF-8 explicit when writing files.
 
 ## Minimal Harness
 
@@ -99,6 +110,7 @@ After applying this skill, make the smallest necessary file changes first. In th
 ```text
 Goal:
 Scope:
+Requirement gate:
 Done:
 State files:
 Loop type:

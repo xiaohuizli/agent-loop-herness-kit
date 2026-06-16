@@ -125,6 +125,42 @@ if (existsSync("templates/AGENTS-loop-contract.md")) {
       "State rule should cover repeated attempts and high-risk retries.",
     );
   }
+  if (!contract.includes("PRD/spec confirmation flow")) {
+    addIssue(
+      "templates/AGENTS-loop-contract.md",
+      1,
+      "change_definition_gate",
+      "Contract should include the staged PRD/spec confirmation gate.",
+    );
+  }
+  if (!contract.includes("UTF-8")) {
+    addIssue(
+      "templates/AGENTS-loop-contract.md",
+      1,
+      "encoding_gate",
+      "Contract should include explicit UTF-8 guidance for generated content.",
+    );
+  }
+}
+
+if (existsSync("skills/agent-loop-harness/SKILL.md")) {
+  const skill = read("skills/agent-loop-harness/SKILL.md");
+  if (!skill.includes("Requirement and Documentation Gates")) {
+    addIssue(
+      "skills/agent-loop-harness/SKILL.md",
+      1,
+      "requirement_gate",
+      "Skill should describe when to add PRD/spec and documentation gates.",
+    );
+  }
+  if (!skill.includes("Requirement gate:")) {
+    addIssue(
+      "skills/agent-loop-harness/SKILL.md",
+      1,
+      "completion_report",
+      "Completion report should include requirement gate status.",
+    );
+  }
 }
 
 const gitLog = spawnSync("git", ["log", "--format=%H%x00%an%x00%ae"], {
