@@ -1,0 +1,188 @@
+team:
+  name: generic-agent-team
+  mode: coordinator-led
+  description: >
+    Generic multi-agent team template for projects that need parallel analysis,
+    bounded implementation ownership, and independent verification.
+
+defaults:
+  language: project-primary-language
+  collaboration_rules:
+    - Start every routed task with a fresh project-state scan.
+    - Read repository docs, tests, and existing patterns before proposing changes.
+    - Select only the agents needed for the current request.
+    - Keep edits inside the assigned ownership boundary unless the coordinator expands scope.
+    - Do not let multiple agents modify the same hotspot file at the same time.
+    - Cross-module changes must list affected modules, compatibility impact, and regression checks.
+    - Behavior changes require tests, QA review, independent review, or a concrete manual regression checklist.
+    - Do not revert unrelated local changes.
+
+workflow:
+  intake:
+    owner: coordinator
+    steps:
+      - Run a fresh project-state scan with git status, file index, targeted search, and relevant file reads.
+      - Classify affected domains from the user request and current repository evidence.
+      - Read this file and relevant prompt files under .agent-team/prompts.
+      - Select only necessary agents.
+      - Assign non-overlapping file ownership before implementation.
+  parallel_analysis:
+    owner: selected_agents
+    rule: Agents may analyze in parallel when their scopes are independent.
+  implementation:
+    owner: selected_agents
+    rule: Agents may implement in parallel only when their write sets do not overlap.
+  integration:
+    owner: coordinator
+    rule: Coordinator integrates outputs, resolves conflicts, and controls hotspot edits.
+  verification:
+    owner: qa
+    rule: QA verifies focused checks first, then broader regression when practical.
+
+agents:
+  - id: coordinator
+    role: Coordination Agent
+    prompt: .agent-team/prompts/coordinator.md
+    owns:
+      - .agent-team/**
+      - project root instruction files
+    responsibilities:
+      - Clarify requirements and split work.
+      - Select agents and assign ownership.
+      - Control integration order and hotspot edits.
+      - Maintain risk, compatibility, and verification plans.
+    output:
+      - affected_domains
+      - agent_assignments
+      - ownership
+      - integration_order
+      - risks
+      - verification_plan
+
+  - id: docs
+    role: Documentation Agent
+    prompt: .agent-team/prompts/docs.md
+    owns:
+      - docs/**
+      - README*
+      - CHANGELOG*
+    responsibilities:
+      - Keep docs aligned with behavior.
+      - Identify stale, duplicate, or conflicting docs.
+      - Update acceptance criteria and regression notes when behavior changes.
+
+  - id: domain_core
+    role: Core Domain Agent
+    prompt: .agent-team/prompts/domain-core.md
+    owns:
+      - src/**
+      - app/**
+      - lib/**
+      - core/**
+      - tests/**
+    responsibilities:
+      - Own the main business workflow.
+      - Control hotspot files selected by the coordinator.
+      - Preserve state transitions, compatibility, and error behavior.
+
+  - id: provider
+    role: Provider Integration Agent
+    prompt: .agent-team/prompts/provider.md
+    owns:
+      - src/**/provider*/**
+      - src/**/integration*/**
+      - src/**/client*/**
+      - tests/**/provider*/**
+      - tests/**/integration*/**
+    responsibilities:
+      - Update provider strategies, adapters, clients, and fallback behavior.
+      - Verify request and response contracts with focused tests or recorded examples.
+
+  - id: asset
+    role: Asset and Storage Agent
+    prompt: .agent-team/prompts/asset.md
+    owns:
+      - src/**/asset*/**
+      - src/**/storage*/**
+      - src/**/file*/**
+      - public/**
+      - assets/**
+      - tests/**/asset*/**
+    responsibilities:
+      - Maintain uploaded, generated, or referenced resources.
+      - Verify path, lifecycle, cleanup, and persistence behavior.
+
+  - id: billing
+    role: Billing and Quota Agent
+    prompt: .agent-team/prompts/billing.md
+    owns:
+      - src/**/billing*/**
+      - src/**/quota*/**
+      - src/**/usage*/**
+      - tests/**/billing*/**
+      - tests/**/quota*/**
+    responsibilities:
+      - Maintain charge, refund, quota, usage, and settlement behavior.
+      - Verify duplicate-charge, failure, and compensation paths.
+
+  - id: admin_config
+    role: Admin and Configuration Agent
+    prompt: .agent-team/prompts/admin-config.md
+    owns:
+      - admin/**
+      - config/**
+      - src/**/config*/**
+      - src/**/job*/**
+      - tests/**/config*/**
+    responsibilities:
+      - Maintain administrative screens, runtime configuration, scheduled jobs, and operator workflows.
+      - Verify mapper, controller, validation, and compatibility behavior where applicable.
+
+  - id: qa
+    role: QA and Regression Agent
+    prompt: .agent-team/prompts/qa.md
+    owns:
+      - tests/**
+      - docs/**/test*
+      - docs/**/failure*
+      - docs/**/regression*
+    responsibilities:
+      - Design focused verification.
+      - Run or specify regression checks.
+      - Report evidence, gaps, and residual risks.
+
+domain_routing:
+  core workflow changes:
+    primary: domain_core
+    support:
+      - docs
+      - qa
+  provider or external integration changes:
+    primary: provider
+    support:
+      - billing
+      - docs
+      - qa
+  asset or storage behavior:
+    primary: asset
+    support:
+      - domain_core
+      - docs
+      - qa
+  billing, quota, or usage changes:
+    primary: billing
+    support:
+      - admin_config
+      - docs
+      - qa
+  admin or runtime configuration:
+    primary: admin_config
+    support:
+      - domain_core
+      - docs
+      - qa
+  documentation only:
+    primary: docs
+    support:
+      - coordinator
+      - qa

@@ -12,6 +12,16 @@ const requiredFiles = [
   "scripts/validate-kit.mjs",
   "templates/AGENTS-loop-contract.md",
   "templates/progress-loop-state.md",
+  "templates/agent-team/start.md",
+  "templates/agent-team/team.yaml",
+  "templates/agent-team/prompts/coordinator.md",
+  "templates/agent-team/prompts/docs.md",
+  "templates/agent-team/prompts/domain-core.md",
+  "templates/agent-team/prompts/provider.md",
+  "templates/agent-team/prompts/asset.md",
+  "templates/agent-team/prompts/billing.md",
+  "templates/agent-team/prompts/admin-config.md",
+  "templates/agent-team/prompts/qa.md",
   "skills/agent-loop-harness/SKILL.md",
   "tests/pressure-scenarios.md",
 ];
@@ -140,6 +150,57 @@ if (existsSync("templates/AGENTS-loop-contract.md")) {
       "encoding_gate",
       "Contract should include explicit UTF-8 guidance for generated content.",
     );
+  }
+}
+
+if (existsSync("templates/agent-team/team.yaml")) {
+  const team = read("templates/agent-team/team.yaml");
+  for (const required of ["coordinator-led", "domain_routing:", "ownership", "qa"]) {
+    if (!team.includes(required)) {
+      addIssue(
+        "templates/agent-team/team.yaml",
+        1,
+        "agent_team_contract",
+        `Agent team template should include ${required}.`,
+      );
+    }
+  }
+}
+
+if (existsSync("templates/agent-team/start.md")) {
+  const start = read("templates/agent-team/start.md");
+  for (const required of ["fresh project-state scan", "non-overlapping file ownership", "Agent Task Template"]) {
+    if (!start.includes(required)) {
+      addIssue(
+        "templates/agent-team/start.md",
+        1,
+        "agent_team_startup",
+        `Agent team startup guide should include ${required}.`,
+      );
+    }
+  }
+}
+
+for (const file of textFiles.filter((name) => name.startsWith("templates/agent-team/"))) {
+  const text = read(file);
+  const databaseMaterialPattern = new RegExp(
+    [
+      "data" + "base[-_\\s]?connection",
+      "read-db" + "-config",
+      "jd" + "bc:",
+      "my" + "sql",
+      "re" + "dis",
+    ].join("|"),
+    "i",
+  );
+  const forbidden = [
+    ["database_connection_script", databaseMaterialPattern],
+    ["project_specific_identifier", /\b[a-z]{2,}kk(?:[-_][a-z0-9_-]+)?\b/i],
+  ];
+  for (const [type, pattern] of forbidden) {
+    if (pattern.test(text)) {
+      addIssue(file, 1, type, "Agent team templates must stay generic and exclude database connection material.");
+    }
   }
 }
 

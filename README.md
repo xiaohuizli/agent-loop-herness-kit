@@ -27,6 +27,7 @@ docs/loop-rules.md                  # 通用范式规则
 docs/adoption-guide.md              # 任意项目接入指南
 templates/AGENTS-loop-contract.md   # 可粘贴到 AGENTS.md/CLAUDE.md
 templates/progress-loop-state.md    # progress.md 状态模板
+templates/agent-team/               # 脱敏后的多 Agent 协作模板
 tests/pressure-scenarios.md         # Skill 压力测试场景
 OPEN_SOURCE_RELEASE.md              # 发布到 GitHub 前检查清单
 ```
@@ -37,7 +38,7 @@ OPEN_SOURCE_RELEASE.md              # 发布到 GitHub 前检查清单
 2. 在项目根目录准备 `progress.md` 作为 Loop 状态层。
 3. 给每个任务先定义 `Goal / Scope / Done / Guardrails / Verifier`。
 4. 行为变更必须经过测试、QA agent、独立 review 或明确的人工回归清单。
-5. 多 Agent 只在存在独立工作流时启用，并且先声明文件 ownership。
+5. 多 Agent 只在存在独立工作流时启用，并且先声明文件 ownership；可从 `templates/agent-team/` 复制通用模板。
 
 ## Skill 安装
 
@@ -61,4 +62,4 @@ Copy-Item -Recurse .\skills\agent-loop-harness "$env:USERPROFILE\.codex\skills\a
 npm test
 ```
 
-该命令会检查必需文件、验证入口、Skill 契约、状态模板、Git 作者元数据，以及常见敏感信息模式。检查输出只报告风险类型和位置，不打印疑似敏感原文。
+该命令会检查必需文件、验证入口、Skill 契约、状态模板、多 Agent 模板、Git 作者元数据，以及常见敏感信息模式。检查输出只报告风险类型和位置，不打印疑似敏感原文。

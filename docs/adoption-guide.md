@@ -102,6 +102,8 @@ Verifier:
 .agent-team/prompts/*.md
 ```
 
+可从本仓库的 `templates/agent-team/` 复制通用模板。该模板只包含 coordinator-led 路由、非重叠 ownership、agent prompt 和 QA 验证规则；不要把目标项目的数据库连接脚本、凭据读取脚本或环境私有工具写入通用模板。
+
 每个 Agent 的 prompt 必须包含：
 
 - 角色
